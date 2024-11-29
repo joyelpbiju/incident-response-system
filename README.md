@@ -6,7 +6,7 @@ This project is being developed by [Joshua Porunnedath Biju](https://github.com/
 
 ## **Project Overview**
 
-The **Incident Response System** is a cybersecurity project designed to streamline incident reporting processes. This project showcases two distinct prototypes:
+The **Incident Response System** is a interative systems project designed to streamline incident reporting processes. This project showcases two distinct prototypes:
 - **Prototype A:** A traditional, multi-step form-based approach for incident reporting.
 - **Prototype B:** An interactive chatbot widget that offers a conversational and user-friendly incident reporting experience.
 
