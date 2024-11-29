@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototype A - Incident Response System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='prototype_a.css') }}">
+    <script>
+        let currentStep = 0;
+
+        function showStep(step) {
+            const steps = document.querySelectorAll('.step');
+            if (step >= 0 && step < steps.length) {
+                steps.forEach((div, index) => {
+                    div.style.display = (index === step) ? 'block' : 'none';
+                });
+                currentStep = step;
+                updateProgressBar(step);
+            }
+        }
+
+        function updateProgressBar(step) {
+            const percentage = ((step + 1) / 10) * 100; // Adjust for 10 steps
+            document.querySelector('.progress-bar-fill').style.width = `${percentage}%`;
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            showStep(0); // Show the first step on page load
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Incident Response System - Prototype A</h1>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-bar-fill"></div>
+        </div>
+
+        <!-- Step 1 -->
+        <div class="step" id="step1">
+            <h2>Step 1: Select Incident Type</h2>
+            <form>
+                <label for="incident-type">Choose an incident:</label>
+                <select id="incident-type" name="incident-type" required>
+                    <option value="">--Select--</option>
+                    <option value="phishing">Phishing</option>
+                    <option value="malware">Malware</option>
+                    <option value="login">Suspicious Login</option>
+                    <option value="other">Other</option>
+                </select>
+                <button type="button" onclick="showStep(1)" class="next-button">Next</button>
+            </form>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step" id="step2" style="display: none;">
+            <h2>Step 2: Enter User Information</h2>
+            <form>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <label for="department">Department:</label>
+                <input type="text" id="department" name="department" required>
+                <button type="button" onclick="showStep(0)" class="prev-button">Previous</button>
+                <button type="button" onclick="showStep(2)" class="next-button">Next</button>
+            </form>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step" id="step3" style="display: none;">
+            <h2>Step 3: Upload Evidence</h2>
+            <form enctype="multipart/form-data">
+                <label for="evidence">Upload any supporting evidence:</label>
+                <input type="file" id="evidence" name="evidence" accept=".jpg,.png,.pdf,.docx" required>
+                <button type="button" onclick="showStep(1)" class="prev-button">Previous</button>
+                <button type="button" onclick="showStep(3)" class="next-button">Next</button>
+            </form>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step" id="step4" style="display: none;">
+            <h2>Step 4: Add Device Information</h2>
+            <form>
+                <label for="device-type">Device Type:</label>
+                <select id="device-type" name="device-type" required>
+                    <option value="">--Select--</option>
+                    <option value="laptop">Laptop</option>
+                    <option value="phone">Phone</option>
+                    <option value="server">Server</option>
+                </select>
+                <label for="operating-system">Operating System:</label>
+                <input type="text" id="operating-system" name="operating-system" required>
+                <button type="button" onclick="showStep(2)" class="prev-button">Previous</button>
+                <button type="button" onclick="showStep(4)" class="next-button">Next</button>
+            </form>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="step" id="step5" style="display: none;">
+            <h2>Step 5: Add Suspected Source Details</h2>
+            <form>
+                <label for="suspected-source">Suspected Source:</label>
+                <input type="text" id="suspected-source" name="suspected-source" required>
+                <label for="suspicious-behavior">Describe Suspicious Behavior:</label>
+                <textarea id="suspicious-behavior" name="suspicious-behavior" rows="4" required></textarea>
+                <button type="button" onclick="showStep(3)" class="prev-button">Previous</button>
+                <button type="button" onclick="showStep(5)" class="next-button">Next</button>
+            </form>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="step" id="step6" style="display: none;">
+            <h2>Step 6: Rate the Severity</h2>
+            <form>
+                <label for="severity">How severe is this incident?</label>
+                <select id="severity" name="severity" required>
+                    <option value="">--Select--</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                </select>
+                <button type="button" onclick="showStep(4)" class="prev-button">Previous</button>
+                <button type="button" onclick="showStep(6)" class="next-button">Next</button>
+            </form>
+        </div>
+
+        <!-- Step 7 -->
+        <div class="step" id="step7" style="display: none;">
+            <h2>Step 7: Specify Date and Time</h2>
+            <form>
+                <label for="incident-time">When did this incident occur?</label>
+                <input type="datetime-local" id="incident-time" name="incident-time" required>
+                <button type="button" onclick="showStep(5)" class="prev-button">Previous</button>
+                <button type="button" onclick="showStep(7)" class="next-button">Next</button>
+            </form>
+        </div>
+
+        <!-- Step 8 -->
+        <div class="step" id="step8" style="display: none;">
+            <h2>Step 8: Notify Relevant Team</h2>
+            <form>
+                <label>Which team should be notified?</label>
+                <div>
+                    <input type="checkbox" id="team-it" name="notified-team" value="IT">
+                    <label for="team-it">IT</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="team-security" name="notified-team" value="Security">
+                    <label for="team-security">Security</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="team-hr" name="notified-team" value="HR">
+                    <label for="team-hr">HR</label>
+                </div>
+                <button type="button" onclick="showStep(6)" class="prev-button">Previous</button>
+                <button type="button" onclick="showStep(8)" class="next-button">Next</button>
+            </form>
+        </div>
+
+        <!-- Step 9 -->
+        <div class="step" id="step9" style="display: none;">
+            <h2>Step 9: Additional Notes</h2>
+            <form>
+                <label for="additional-notes">Do you have any additional comments?</label>
+                <textarea id="additional-notes" name="additional-notes" rows="4"></textarea>
+                <button type="button" onclick="showStep(7)" class="prev-button">Previous</button>
+                <button type="button" onclick="showStep(9)" class="next-button">Next</button>
+            </form>
+        </div>
+
+        <!-- Step 10 -->
+        <div class="step" id="step10" style="display: none;">
+            <h2>Step 10: Confirmation and Submit</h2>
+            <p>Please review the details before submission:</p>
+            <form method="POST" action="/prototype-a">
+                <button type="button" onclick="showStep(8)" class="prev-button">Previous</button>
+                <button type="submit" class="next-button">Submit</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

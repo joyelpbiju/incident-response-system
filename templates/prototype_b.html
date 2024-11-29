@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Chatbot Widget - Prototype B</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='prototype_b.css') }}">
+</head>
+<body>
+    <div class="chatbot-container">
+        <div id="chat-window" class="chat-window">
+            <!-- Chat messages will dynamically appear here -->
+        </div>
+        <div class="input-container">
+            <input id="chat-input" type="text" placeholder="Type your response..." autocomplete="off" style="display: none;">
+            <input id="file-input" type="file" style="display: none;">
+            <input id="datetime-input" type="datetime-local" style="display: none;">
+            <button id="send-button" style="display: none;">Send</button>
+        </div>
+        <button id="close-button" class="close-button">Close</button>
+    </div>
+
+    <script>
+        let currentQuestionIndex = 0;
+        const questions = [
+            { type: 'options', text: 'What type of incident are you reporting?', options: ['Phishing', 'Malware', 'Suspicious Login', 'Other'] },
+            { type: 'input', text: 'Please provide your name:' },
+            { type: 'input', text: 'Please provide your email address:' },
+            { type: 'input', text: 'Please provide your department:' },
+            { type: 'options', text: 'Do you have any evidence to upload?', options: ['Yes', 'No'] },
+            { type: 'file', text: 'Upload your evidence:', conditional: { key: 'Do you have any evidence to upload?', value: 'Yes' } },
+            { type: 'input', text: 'What is the suspected source of the incident?' },
+            { type: 'options', text: 'How severe is the incident?', options: ['Low', 'Medium', 'High', 'Critical'] },
+            { type: 'datetime', text: 'When did this incident occur?' },
+            { type: 'options', text: 'Any additional comments?', options: ['Yes', 'No'] },
+            { type: 'textarea', text: 'Please provide your additional comments:', conditional: { key: 'Any additional comments?', value: 'Yes' } },
+            { type: 'final', text: 'Thank you for your submission. We\'ll look into it and get back to you as soon as possible.' }
+        ];
+        const responses = {};
+
+        function appendMessage(sender, message) {
+            const chatWindow = document.getElementById('chat-window');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add(sender === 'bot' ? 'bot-message' : 'user-message');
+            messageDiv.innerHTML = message;
+            chatWindow.appendChild(messageDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to the latest message
+        }
+
+        function displayOptions(options) {
+            const chatWindow = document.getElementById('chat-window');
+            const optionsContainer = document.createElement('div');
+            optionsContainer.classList.add('options-container');
+
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-button');
+                button.onclick = () => {
+                    appendMessage('user', option);
+                    responses[questions[currentQuestionIndex].text] = option;
+
+                    // Handle "No" for additional comments
+                    if (questions[currentQuestionIndex].text === 'Any additional comments?' && option === 'No') {
+                        optionsContainer.remove();
+                        displayFinalMessage();
+                        return;
+                    }
+
+                    // Clear options and move to the next question
+                    optionsContainer.remove();
+                    currentQuestionIndex++;
+                    displayQuestion();
+                };
+                optionsContainer.appendChild(button);
+            });
+
+            chatWindow.appendChild(optionsContainer);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function displayFileInput() {
+            const fileInput = document.getElementById('file-input');
+            fileInput.style.display = 'block';
+            fileInput.onchange = () => {
+                const fileName = fileInput.files[0].name;
+                appendMessage('user', `Uploaded: ${fileName}`);
+                responses[questions[currentQuestionIndex].text] = fileName;
+
+                // Reset file input and move to next question
+                fileInput.style.display = 'none';
+                currentQuestionIndex++;
+                displayQuestion();
+            };
+        }
+
+        function displayQuestion() {
+            const question = questions[currentQuestionIndex];
+
+            if (question.conditional) {
+                const { key, value } = question.conditional;
+                if (responses[key] !== value) {
+                    currentQuestionIndex++;
+                    displayQuestion();
+                    return;
+                }
+            }
+
+            appendMessage('bot', question.text);
+
+            if (question.type === 'options') {
+                displayOptions(question.options);
+            } else if (question.type === 'input') {
+                showInputField();
+            } else if (question.type === 'file') {
+                displayFileInput();
+            } else if (question.type === 'datetime') {
+                showDatetimeField();
+            } else if (question.type === 'textarea') {
+                showTextareaField();
+            } else if (question.type === 'final') {
+                displayFinalMessage();
+            }
+        }
+
+        function showInputField() {
+            const inputField = document.getElementById('chat-input');
+            inputField.type = 'text';
+            inputField.placeholder = 'Type your response...';
+            inputField.style.display = 'block';
+            document.getElementById('send-button').style.display = 'block';
+
+            document.getElementById('send-button').onclick = () => {
+                const userResponse = inputField.value.trim();
+                if (!userResponse) return;
+
+                appendMessage('user', userResponse);
+                responses[questions[currentQuestionIndex].text] = userResponse;
+
+                inputField.value = '';
+                inputField.style.display = 'none';
+                document.getElementById('send-button').style.display = 'none';
+
+                currentQuestionIndex++;
+                displayQuestion();
+            };
+        }
+
+        function showDatetimeField() {
+            const datetimeInput = document.getElementById('datetime-input');
+            datetimeInput.style.display = 'block';
+            document.getElementById('send-button').style.display = 'block';
+
+            document.getElementById('send-button').onclick = () => {
+                const userResponse = datetimeInput.value.trim();
+                if (!userResponse) return;
+
+                appendMessage('user', userResponse);
+                responses[questions[currentQuestionIndex].text] = userResponse;
+
+                datetimeInput.value = '';
+                datetimeInput.style.display = 'none';
+                document.getElementById('send-button').style.display = 'none';
+
+                currentQuestionIndex++;
+                displayQuestion();
+            };
+        }
+
+        function showTextareaField() {
+            const inputField = document.getElementById('chat-input');
+            inputField.type = 'text';
+            inputField.placeholder = 'Type your notes here...';
+            inputField.style.display = 'block';
+            document.getElementById('send-button').style.display = 'block';
+
+            document.getElementById('send-button').onclick = () => {
+                const userResponse = inputField.value.trim();
+                if (!userResponse) return;
+
+                appendMessage('user', userResponse);
+                responses[questions[currentQuestionIndex].text] = userResponse;
+
+                inputField.value = '';
+                inputField.style.display = 'none';
+                document.getElementById('send-button').style.display = 'none';
+
+                displayFinalMessage();
+            };
+        }
+
+        function displayFinalMessage() {
+            appendMessage('bot', 'Thank you for your submission. We\'ll look into it and get back to you as soon as possible.');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            displayQuestion(); // Start the conversation
+
+            // Close button functionality
+            document.getElementById('close-button').onclick = () => {
+                const chatbotContainer = document.querySelector('.chatbot-container');
+                chatbotContainer.style.display = 'none'; // Hide the chatbot
+            };
+        });
+    </script>
+</body>
+</html>
