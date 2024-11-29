@@ -1,6 +1,6 @@
 # **Incident Response System**
 
-This project was built by [Joshua Porunnedath Biju](https://github.com/JOSHUAPBIJU) and [Joyel Porunnedath Biju](https://github.com/joyelpbiju).
+This project is being developed by [Joshua Porunnedath Biju](https://github.com/JOSHUAPBIJU) and [Joyel Porunnedath Biju](https://github.com/joyelpbiju).
 
 ![License](https://img.shields.io/badge/license-MIT-green) ![Contributions](https://img.shields.io/badge/contributions-welcome-brightgreen) ![Status](https://img.shields.io/badge/status-active-brightgreen)
 
@@ -11,6 +11,8 @@ The **Incident Response System** is a cybersecurity project designed to streamli
 - **Prototype B:** An interactive chatbot widget that offers a conversational and user-friendly incident reporting experience.
 
 The goal is to improve user experience and efficiency through the interactive chatbot system while providing a comparison of the two approaches.
+
+**This project is a work in progress, with more features and enhancements planned.**
 
 ---
 
@@ -91,23 +93,6 @@ incident_response_system/
 
 ---
 
-## **Screenshots**
-
-### **Prototype A (Form-Based Approach)**
-![Prototype A](https://via.placeholder.com/800x400?text=Screenshot+of+Prototype+A)
-
-### **Prototype B (Chatbot Widget)**
-![Prototype B](https://via.placeholder.com/800x400?text=Screenshot+of+Prototype+B)
-
----
-
-## **Future Enhancements**
-- Add database integration for saving incident reports.
-- Implement real-time chatbot responses with AI-powered suggestions.
-- Enhance the visual appeal of the chatbot with animations.
-
----
-
 ## **Contributing**
 
 We welcome contributions to improve the project! Follow these steps to contribute:
@@ -133,8 +118,3 @@ We welcome contributions to improve the project! Follow these steps to contribut
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
-
-
-
----
-
