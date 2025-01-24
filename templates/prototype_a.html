@@ -7,7 +7,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='prototype_a.css') }}">
     <script>
         let currentStep = 0;
+        let startTime;
 
+        // Start Timer
+        document.addEventListener("DOMContentLoaded", function () {
+            startTime = new Date(); // Record the start time when the page loads
+            showStep(0);
+        });
+
+        // Show a step
         function showStep(step) {
             const steps = document.querySelectorAll('.step');
             if (step >= 0 && step < steps.length) {
@@ -19,14 +27,88 @@
             }
         }
 
+        // Validate inputs for the current step
+        function validateStep(step) {
+            const currentStepElement = document.querySelector(`#step${step}`);
+            const requiredFields = currentStepElement.querySelectorAll('input, select, textarea');
+
+            for (let field of requiredFields) {
+                if (field.tagName === 'INPUT' && field.type === 'text' && field.value.trim() === "") {
+                    showPopup('Please complete all required fields.');
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Update progress bar
         function updateProgressBar(step) {
-            const percentage = ((step + 1) / 10) * 100; // Adjust for 10 steps
+            const percentage = ((step + 1) / 11) * 100;
             document.querySelector('.progress-bar-fill').style.width = `${percentage}%`;
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            showStep(0); // Show the first step on page load
-        });
+        // Show a temporary popup message
+        function showPopup(message) {
+            const popup = document.createElement('div');
+            popup.textContent = message;
+            popup.style.position = 'fixed';
+            popup.style.top = '10%';
+            popup.style.left = '50%';
+            popup.style.transform = 'translateX(-50%)';
+            popup.style.backgroundColor = '#ff4d4d';
+            popup.style.color = '#fff';
+            popup.style.padding = '10px 20px';
+            popup.style.borderRadius = '5px';
+            popup.style.zIndex = '1000';
+            popup.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+            document.body.appendChild(popup);
+
+            setTimeout(() => {
+                popup.remove();
+            }, 2000);
+        }
+
+        // Calculate and store the time taken
+        function calculateTimeTaken() {
+            const endTime = new Date();
+            const timeTaken = (endTime - startTime) / 1000; // Calculate time in seconds
+            document.getElementById("time_taken").value = timeTaken;
+        }
+
+        // Error calculation logic
+        function calculateErrors() {
+            const correctAnswers = {
+                "incident-type": "Phishing",
+                "name": "John Wick",
+                "email": "john.wick@techsecure.com",
+                "department": "IT",
+                "device-type": "Laptop",
+                "suspected-source": "account-security@unknownmail.com",
+                "data-sensitivity": "Confidential Company Data",
+                "severity": "Critical",
+                "incident-time": "2025-01-25T15:47",
+                "team": "Security Operations Center"
+            };
+
+            let errors = 0;
+            for (let key in correctAnswers) {
+                const userValue = document.getElementById(key)?.value?.trim().toLowerCase() || "";
+                if (correctAnswers[key].toLowerCase() !== userValue) {
+                    errors++;
+                }
+            }
+            document.getElementById("error_count").value = errors;
+        }
+
+        function goToNextStep(step) {
+            if (validateStep(step)) {
+                showStep(step + 1);
+            }
+        }
+
+        function goToPreviousStep(step) {
+            showStep(step - 1);
+        }
     </script>
 </head>
 <body>
@@ -38,149 +120,113 @@
             <div class="progress-bar-fill"></div>
         </div>
 
-        <!-- Step 1 -->
-        <div class="step" id="step1">
-            <h2>Step 1: Select Incident Type</h2>
-            <form>
-                <label for="incident-type">Choose an incident:</label>
-                <select id="incident-type" name="incident-type" required>
-                    <option value="">--Select--</option>
-                    <option value="phishing">Phishing</option>
-                    <option value="malware">Malware</option>
-                    <option value="login">Suspicious Login</option>
-                    <option value="other">Other</option>
-                </select>
-                <button type="button" onclick="showStep(1)" class="next-button">Next</button>
-            </form>
-        </div>
+        <!-- Steps -->
+        <form method="POST" action="/prototype-a">
+            <input type="hidden" id="time_taken" name="time_A">
+            <input type="hidden" id="error_count" name="errors_A">
 
-        <!-- Step 2 -->
-        <div class="step" id="step2" style="display: none;">
-            <h2>Step 2: Enter User Information</h2>
-            <form>
+            <!-- Step 1 -->
+            <div class="step" id="step0">
+                <h2>Step 1: Select Incident Type</h2>
+                <label for="incident-type">What kind of Incident are you reporting?:</label>
+                <input type="text" id="incident-type" name="incident-type" required autocomplete="off">
+                <button type="button" onclick="goToNextStep(0)" class="next-button">Next</button>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step" id="step1" style="display: none;">
+                <h2>Step 2: Please Enter User Information</h2>
                 <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
+                <input type="text" id="name" name="name" required autocomplete="off">
                 <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
+                <input type="email" id="email" name="email" required autocomplete="off">
                 <label for="department">Department:</label>
-                <input type="text" id="department" name="department" required>
-                <button type="button" onclick="showStep(0)" class="prev-button">Previous</button>
-                <button type="button" onclick="showStep(2)" class="next-button">Next</button>
-            </form>
-        </div>
+                <input type="text" id="department" name="department" required autocomplete="off">
+                <button type="button" onclick="goToPreviousStep(1)" class="prev-button">Previous</button>
+                <button type="button" onclick="goToNextStep(1)" class="next-button">Next</button>
+            </div>
 
         <!-- Step 3 -->
-        <div class="step" id="step3" style="display: none;">
-            <h2>Step 3: Upload Evidence</h2>
-            <form enctype="multipart/form-data">
-                <label for="evidence">Upload any supporting evidence:</label>
-                <input type="file" id="evidence" name="evidence" accept=".jpg,.png,.pdf,.docx" required>
-                <button type="button" onclick="showStep(1)" class="prev-button">Previous</button>
-                <button type="button" onclick="showStep(3)" class="next-button">Next</button>
-            </form>
+        <div class="step" id="step2" style="display: none;">
+            <h2>Step 3: Please Upload the Evidence</h2>
+            <label for="evidence">Upload any supporting evidence:</label>
+            <input type="file" id="evidence" name="evidence" accept=".jpg,.png,.pdf,.docx" required>
+            <button type="button" onclick="goToPreviousStep(2)" class="prev-button">Previous</button>
+            <button type="button" onclick="goToNextStep(2)" class="next-button">Next</button>
         </div>
 
         <!-- Step 4 -->
-        <div class="step" id="step4" style="display: none;">
+        <div class="step" id="step3" style="display: none;">
             <h2>Step 4: Add Device Information</h2>
-            <form>
-                <label for="device-type">Device Type:</label>
-                <select id="device-type" name="device-type" required>
-                    <option value="">--Select--</option>
-                    <option value="laptop">Laptop</option>
-                    <option value="phone">Phone</option>
-                    <option value="server">Server</option>
-                </select>
-                <label for="operating-system">Operating System:</label>
-                <input type="text" id="operating-system" name="operating-system" required>
-                <button type="button" onclick="showStep(2)" class="prev-button">Previous</button>
-                <button type="button" onclick="showStep(4)" class="next-button">Next</button>
-            </form>
+            <label for="device-type">Which type of device was targeted in the Incident?</label>
+            <input type="text" id="device-type" name="device-type" required autocomplete="off">
+            <button type="button" onclick="goToPreviousStep(3)" class="prev-button">Previous</button>
+            <button type="button" onclick="goToNextStep(3)" class="next-button">Next</button>
         </div>
 
         <!-- Step 5 -->
-        <div class="step" id="step5" style="display: none;">
+        <div class="step" id="step4" style="display: none;">
             <h2>Step 5: Add Suspected Source Details</h2>
-            <form>
-                <label for="suspected-source">Suspected Source:</label>
-                <input type="text" id="suspected-source" name="suspected-source" required>
-                <label for="suspicious-behavior">Describe Suspicious Behavior:</label>
-                <textarea id="suspicious-behavior" name="suspicious-behavior" rows="4" required></textarea>
-                <button type="button" onclick="showStep(3)" class="prev-button">Previous</button>
-                <button type="button" onclick="showStep(5)" class="next-button">Next</button>
-            </form>
+            <label for="suspected-source"> What do you think as the Suspected Source of the Incident</label>
+            <input type="text" id="suspected-source" name="suspected-source" required autocomplete="off">
+            <button type="button" onclick="goToPreviousStep(4)" class="prev-button">Previous</button>
+            <button type="button" onclick="goToNextStep(4)" class="next-button">Next</button>
         </div>
 
         <!-- Step 6 -->
-        <div class="step" id="step6" style="display: none;">
-            <h2>Step 6: Rate the Severity</h2>
-            <form>
-                <label for="severity">How severe is this incident?</label>
-                <select id="severity" name="severity" required>
-                    <option value="">--Select--</option>
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="critical">Critical</option>
-                </select>
-                <button type="button" onclick="showStep(4)" class="prev-button">Previous</button>
-                <button type="button" onclick="showStep(6)" class="next-button">Next</button>
-            </form>
+        <div class="step" id="step5" style="display: none;">
+            <h2>Step 6: Data Sensitivity</h2>
+            <label for="data-sensitivity">What type of data might be affected?</label>
+            <input type="text" id="data-sensitivity" name="data-sensitivity" required autocomplete="off">
+            <button type="button" onclick="goToPreviousStep(5)" class="prev-button">Previous</button>
+            <button type="button" onclick="goToNextStep(5)" class="next-button">Next</button>
         </div>
 
         <!-- Step 7 -->
-        <div class="step" id="step7" style="display: none;">
-            <h2>Step 7: Specify Date and Time</h2>
-            <form>
-                <label for="incident-time">When did this incident occur?</label>
-                <input type="datetime-local" id="incident-time" name="incident-time" required>
-                <button type="button" onclick="showStep(5)" class="prev-button">Previous</button>
-                <button type="button" onclick="showStep(7)" class="next-button">Next</button>
-            </form>
+        <div class="step" id="step6" style="display: none;">
+            <h2>Step 7: Rate the Severity</h2>
+            <label for="severity">How severe is this incident?</label>
+            <input type="text" id="severity" name="severity" required autocomplete="off">
+            <button type="button" onclick="goToPreviousStep(6)" class="prev-button">Previous</button>
+            <button type="button" onclick="goToNextStep(6)" class="next-button">Next</button>
         </div>
 
-        <!-- Step 8 -->
-        <div class="step" id="step8" style="display: none;">
-            <h2>Step 8: Notify Relevant Team</h2>
-            <form>
-                <label>Which team should be notified?</label>
-                <div>
-                    <input type="checkbox" id="team-it" name="notified-team" value="IT">
-                    <label for="team-it">IT</label>
-                </div>
-                <div>
-                    <input type="checkbox" id="team-security" name="notified-team" value="Security">
-                    <label for="team-security">Security</label>
-                </div>
-                <div>
-                    <input type="checkbox" id="team-hr" name="notified-team" value="HR">
-                    <label for="team-hr">HR</label>
-                </div>
-                <button type="button" onclick="showStep(6)" class="prev-button">Previous</button>
-                <button type="button" onclick="showStep(8)" class="next-button">Next</button>
-            </form>
+       <!-- Step 8 -->
+        <div class="step" id="step7" style="display: none;">
+            <h2>Step 8: Specify Date and Time</h2>
+            <label for="incident-time">When did this incident occur?</label>
+            <input type="datetime-local" id="incident-time" name="incident-time" required>
+            <button type="button" onclick="goToPreviousStep(7)" class="prev-button">Previous</button>
+            <button type="button" onclick="goToNextStep(7)" class="next-button">Next</button>
         </div>
 
         <!-- Step 9 -->
-        <div class="step" id="step9" style="display: none;">
-            <h2>Step 9: Additional Notes</h2>
-            <form>
-                <label for="additional-notes">Do you have any additional comments?</label>
-                <textarea id="additional-notes" name="additional-notes" rows="4"></textarea>
-                <button type="button" onclick="showStep(7)" class="prev-button">Previous</button>
-                <button type="button" onclick="showStep(9)" class="next-button">Next</button>
-            </form>
+        <div class="step" id="step8" style="display: none;">
+            <h2>Step 9: Which Team Should Be Notified?</h2>
+            <label for="team">Enter the team to notify:</label>
+            <input type="text" id="team" name="team" required autocomplete="off">
+            <button type="button" onclick="goToPreviousStep(8)" class="prev-button">Previous</button>
+            <button type="button" onclick="goToNextStep(8)" class="next-button">Next</button>
         </div>
 
         <!-- Step 10 -->
-        <div class="step" id="step10" style="display: none;">
-            <h2>Step 10: Confirmation and Submit</h2>
-            <p>Please review the details before submission:</p>
-            <form method="POST" action="/prototype-a">
-                <button type="button" onclick="showStep(8)" class="prev-button">Previous</button>
-                <button type="submit" class="next-button">Submit</button>
-            </form>
+        <div class="step" id="step9" style="display: none;">
+            <h2>Step 10: Additional Notes</h2>
+            <label for="additional-notes">Do you have any additional comments?</label>
+            <textarea id="additional-notes" name="additional-notes" rows="4"></textarea>
+            <button type="button" onclick="goToPreviousStep(9)" class="prev-button">Previous</button>
+            <button type="button" onclick="goToNextStep(9)" class="next-button">Next</button>
         </div>
+
+      <!-- Step 11 -->
+            <div class="step" id="step10" style="display: none;">
+                <h2>Step 11: Confirmation and Submit</h2>
+                <p>Please review the details before submission:</p>
+                <button type="button" onclick="goToPreviousStep(10)" class="prev-button">Previous</button>
+                <button type="submit" onclick="calculateTimeTaken(); calculateErrors();" class="next-button">Submit</button>
+            </div>
+        </form>
     </div>
 </body>
 </html>
+
