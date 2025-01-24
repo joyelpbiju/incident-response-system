@@ -1,0 +1,107 @@
+/* General Styling */
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to bottom right, #e3ffe7, #d9e7ff); /* Aesthetic gradient */
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Minimum height for scrollable content */
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+/* Container Styling */
+.container {
+    max-width: 600px;
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    margin: 20px; /* Add margin for smaller screens */
+}
+
+/* Header */
+h1 {
+    font-size: 2.5em;
+    color: #0078d4;
+    margin-bottom: 20px;
+}
+
+/* Paragraph */
+p {
+    font-size: 1.2em;
+    color: #555;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+/* Form Styling */
+.user-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.user-form label {
+    font-size: 1em;
+    font-weight: bold;
+    color: #333;
+}
+
+.user-form input,
+.user-form select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1em;
+    width: 100%;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.user-form input:focus,
+.user-form select:focus {
+    border-color: #0078d4;
+    background-color: #fff;
+    outline: none;
+}
+
+/* Button Styling */
+.start-button {
+    background-color: #0078d4;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.start-button:hover {
+    background-color: #0056a1;
+    transform: scale(1.05); /* Slight scale on hover */
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px 25px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    p {
+        font-size: 1em;
+    }
+
+    .start-button {
+        width: 100%;
+    }
+}
