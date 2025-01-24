@@ -1,92 +1,134 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
+import sqlite3
 
-app = Flask(__name__)
+# Initialize the Flask app
+app = Flask(__name__, template_folder='../templates', static_folder='../static')
 
-# Root URL
+def connect_db():
+    """Connect to SQLite database."""
+    db_path = r"C:\Users\Acer\PycharmProjects\incident_response_system\user_performance.db"
+    return sqlite3.connect(db_path)
+
+# Initialize the database table
+def initialize_database():
+    conn = connect_db()
+    cursor = conn.cursor()
+    # Create the table if it does not exist
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS user_performance (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        fullname TEXT,
+        age INTEGER,
+        gender TEXT,
+        time_A REAL,
+        time_B REAL,
+        errors_A INTEGER,
+        errors_B INTEGER
+    );
+    ''')
+    conn.commit()
+    conn.close()
+
 @app.route('/')
-def home():
-    # Redirect to Prototype A as the default page
-    return redirect(url_for('prototype_a'))
+def startup():
+    """Redirect to the startup page as the default landing page."""
+    return render_template('startup.html')
 
-# Route for Prototype A
+@app.route('/task', methods=['GET', 'POST'])
+def task():
+    if request.method == 'POST':
+        try:
+            fullname = request.form.get('fullname')
+            age = request.form.get('age')
+            gender = request.form.get('gender')
+
+            print(f"Fullname: {fullname}, Age: {age}, Gender: {gender}")
+
+            # Save user details to the database
+            conn = connect_db()
+            cursor = conn.cursor()
+            cursor.execute(
+                'INSERT INTO user_performance (fullname, age, gender) VALUES (?, ?, ?)',
+                (fullname, age, gender)
+            )
+            conn.commit()
+            conn.close()
+
+            print("User details saved successfully.")
+            return redirect('/task')
+
+        except Exception as e:
+            print(f"Error details: {e}")
+            return "An error occurred while saving user details.", 500
+
+    return render_template('task.html')
+
 @app.route('/prototype-a', methods=['GET', 'POST'])
 def prototype_a():
     if request.method == 'POST':
         try:
-            # Collect form data from Prototype A
-            data = {
-                'incident_type': request.form.get('incident-type'),
-                'name': request.form.get('name'),
-                'email': request.form.get('email'),
-                'department': request.form.get('department'),
-                'evidence': request.files.get('evidence'),  # For file uploads
-                'device_type': request.form.get('device-type'),
-                'suspected_source': request.form.get('suspected-source'),
-                'severity': request.form.get('severity'),
-                'incident_time': request.form.get('incident-time'),
-                'additional_notes': request.form.get('additional-notes'),
-            }
+            time_A = request.form.get('time_A')
+            errors_A = request.form.get('errors_A')
 
-            # Debugging: Log form data
-            print("Prototype A - Form Data Received:", data)
+            # Save the data to the database
+            conn = connect_db()
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE user_performance
+                SET time_A = ?, errors_A = ?
+                WHERE id = (SELECT MAX(id) FROM user_performance)
+            ''', (time_A, errors_A))
+            conn.commit()
+            conn.close()
 
-            # Redirect to the success page after form submission
-            return redirect(url_for('success'))
+            print(f"Prototype A Data Saved: Time - {time_A}, Errors - {errors_A}")
+            return redirect('/task')
+
         except Exception as e:
-            print("Error in Prototype A:", e)
+            print(f"Error in Prototype A POST request: {e}")
             return "An error occurred while processing Prototype A.", 500
 
-    # Render the Prototype A template
     return render_template('prototype_a.html')
 
-# Route for Success Page
-@app.route('/success')
-def success():
-    try:
-        # Debugging: Log success page access
-        print("Success page accessed.")
-        return render_template('success.html')  # Display success message and button
-    except Exception as e:
-        print("Error in Success Page:", e)
-        return "An error occurred while rendering the success page.", 500
-
-# Route for Prototype B
 @app.route('/prototype-b', methods=['GET', 'POST'])
 def prototype_b():
+    if request.method == 'GET':
+        return render_template('prototype_b.html')
+
     if request.method == 'POST':
         try:
-            # Collect JSON data from Prototype B
-            data = request.json
-            # Debugging: Log form data
-            print("Prototype B - Data Received:", data)
-            return jsonify({"message": "Responses submitted successfully!"}), 200
+            # Collect the data from the POST request
+            data = request.get_json()
+            time_B = float(data.get('time_B', 0))
+            errors_B = int(data.get('errors_B', 0))
+
+            # Save the data to the database
+            conn = connect_db()
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE user_performance
+                SET time_B = ?, errors_B = ?
+                WHERE id = (SELECT MAX(id) FROM user_performance)
+            ''', (time_B, errors_B))
+            conn.commit()
+            conn.close()
+
+            print(f"Prototype B Data Saved: Time - {time_B}, Errors - {errors_B}")
+            return jsonify({"message": "Data saved successfully!"}), 200
+
         except Exception as e:
-            print("Error in Prototype B POST request:", e)
-            return jsonify({"message": "An error occurred while processing Prototype B."}), 500
+            print(f"Error: {e}")
+            return jsonify({"message": "An error occurred while saving data."}), 500
 
-    try:
-        # Render the Prototype B template
-        print("Rendering Prototype B widget.")
-        return render_template('prototype_b.html')
-    except Exception as e:
-        print("Error in Prototype B GET request:", e)
-        return "An error occurred while rendering Prototype B.", 500
+@app.route('/questionnaire')
+def questionnaire():
+    """
+    Render the questionnaire instructions page.
+    Redirects to the question.html file.
+    """
+    return render_template('question.html')
 
-# API route for Prototype B responses
-@app.route('/submit_responses', methods=['POST'])
-def submit_responses():
-    try:
-        # Collect JSON data from Prototype B
-        data = request.get_json()
-        # Debugging: Log responses
-        print("Prototype B - Responses Received:", data)
-        # Simulate saving the responses (e.g., to a database)
-        return jsonify({"message": "Responses submitted successfully!"}), 200
-    except Exception as e:
-        print("Error in /submit_responses API:", e)
-        return jsonify({"message": "An error occurred while submitting responses."}), 500
-
-# Main Entry Point
 if __name__ == '__main__':
     print("Starting Flask app...")
+    initialize_database()  # Ensure the database is initialized before starting
     app.run(debug=True)
