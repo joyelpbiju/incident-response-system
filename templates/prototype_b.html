@@ -13,85 +13,66 @@
         </div>
         <div class="input-container">
             <input id="chat-input" type="text" placeholder="Type your response..." autocomplete="off" style="display: none;">
-            <input id="file-input" type="file" style="display: none;">
             <input id="datetime-input" type="datetime-local" style="display: none;">
+            <input id="file-input" type="file" accept=".pdf,.jpg,.png,.docx" style="display: none;">
+            <textarea id="textarea-input" placeholder="Enter additional comments..." style="display: none;"></textarea>
             <button id="send-button" style="display: none;">Send</button>
+            <button id="submit-button" style="display: none;">Submit</button>
         </div>
         <button id="close-button" class="close-button">Close</button>
+        <input type="hidden" id="time_taken" name="time_B">
+        <input type="hidden" id="error_count" name="errors_B">
     </div>
 
     <script>
         let currentQuestionIndex = 0;
+        let startTime;
+
         const questions = [
             { type: 'options', text: 'What type of incident are you reporting?', options: ['Phishing', 'Malware', 'Suspicious Login', 'Other'] },
             { type: 'input', text: 'Please provide your name:' },
             { type: 'input', text: 'Please provide your email address:' },
             { type: 'input', text: 'Please provide your department:' },
-            { type: 'options', text: 'Do you have any evidence to upload?', options: ['Yes', 'No'] },
-            { type: 'file', text: 'Upload your evidence:', conditional: { key: 'Do you have any evidence to upload?', value: 'Yes' } },
-            { type: 'input', text: 'What is the suspected source of the incident?' },
-            { type: 'options', text: 'How severe is the incident?', options: ['Low', 'Medium', 'High', 'Critical'] },
+            { type: 'options', text: 'Could you please tell us which type of device was targeted in the incident?', options: ['Laptop', 'Phone', 'Server', 'Other'] },
+            { type: 'input', text: 'What do you think as the suspected source of the incident? it can be a email id or a website ' },
+            { type: 'options', text: 'What kind of data can be affected?', options: ['Personal Information', 'Financial Data', 'Confidential Company Data', 'No Data Involved'] },
+            { type: 'options', text: 'How would you rate the severity of this incident?', options: ['Low', 'Medium', 'High', 'Critical'] },
             { type: 'datetime', text: 'When did this incident occur?' },
-            { type: 'options', text: 'Any additional comments?', options: ['Yes', 'No'] },
-            { type: 'textarea', text: 'Please provide your additional comments:', conditional: { key: 'Any additional comments?', value: 'Yes' } },
-            { type: 'final', text: 'Thank you for your submission. We\'ll look into it and get back to you as soon as possible.' }
+            { type: 'options', text: 'Which team should be notified about this incident?', options: ['IT Support', 'Security Operations Center', 'HR', 'Other'] },
+            { type: 'file', text: 'Please upload evidence:' },
+            { type: 'options', text: 'Do you have any additional comments?', options: ['Yes', 'No'] },
+            { type: 'textarea', text: 'Please provide your additional comments:', conditional: { key: 'Do you have any additional comments?', value: 'Yes' } },
+            { type: 'final', text: "Can I confirm this information?" }
         ];
+
         const responses = {};
 
-        function appendMessage(sender, message) {
+        document.addEventListener('DOMContentLoaded', () => {
+            startTime = new Date(); // Start timer when chatbot loads
+            displayQuestion();
+
+            document.getElementById('close-button').onclick = () => {
+                window.location.href = "/task"; // Redirect to Task Description Page
+            };
+        });
+
+        function appendMessage(sender, message, isEditable = false, questionKey = '') {
             const chatWindow = document.getElementById('chat-window');
             const messageDiv = document.createElement('div');
             messageDiv.classList.add(sender === 'bot' ? 'bot-message' : 'user-message');
             messageDiv.innerHTML = message;
+
+            if (isEditable && sender === 'user') {
+                const editIcon = document.createElement('button');
+                editIcon.classList.add('edit-icon');
+                editIcon.innerHTML = '✎';
+                editIcon.onclick = () => editResponse(questionKey);
+
+                messageDiv.appendChild(editIcon);
+            }
+
             chatWindow.appendChild(messageDiv);
             chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to the latest message
-        }
-
-        function displayOptions(options) {
-            const chatWindow = document.getElementById('chat-window');
-            const optionsContainer = document.createElement('div');
-            optionsContainer.classList.add('options-container');
-
-            options.forEach(option => {
-                const button = document.createElement('button');
-                button.textContent = option;
-                button.classList.add('option-button');
-                button.onclick = () => {
-                    appendMessage('user', option);
-                    responses[questions[currentQuestionIndex].text] = option;
-
-                    // Handle "No" for additional comments
-                    if (questions[currentQuestionIndex].text === 'Any additional comments?' && option === 'No') {
-                        optionsContainer.remove();
-                        displayFinalMessage();
-                        return;
-                    }
-
-                    // Clear options and move to the next question
-                    optionsContainer.remove();
-                    currentQuestionIndex++;
-                    displayQuestion();
-                };
-                optionsContainer.appendChild(button);
-            });
-
-            chatWindow.appendChild(optionsContainer);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-        }
-
-        function displayFileInput() {
-            const fileInput = document.getElementById('file-input');
-            fileInput.style.display = 'block';
-            fileInput.onchange = () => {
-                const fileName = fileInput.files[0].name;
-                appendMessage('user', `Uploaded: ${fileName}`);
-                responses[questions[currentQuestionIndex].text] = fileName;
-
-                // Reset file input and move to next question
-                fileInput.style.display = 'none';
-                currentQuestionIndex++;
-                displayQuestion();
-            };
         }
 
         function displayQuestion() {
@@ -112,21 +93,43 @@
                 displayOptions(question.options);
             } else if (question.type === 'input') {
                 showInputField();
-            } else if (question.type === 'file') {
-                displayFileInput();
             } else if (question.type === 'datetime') {
                 showDatetimeField();
+            } else if (question.type === 'file') {
+                showFileUpload();
             } else if (question.type === 'textarea') {
                 showTextareaField();
             } else if (question.type === 'final') {
-                displayFinalMessage();
+                displayConfirmationStep();
             }
+        }
+
+        function displayOptions(options) {
+            const chatWindow = document.getElementById('chat-window');
+            const optionsContainer = document.createElement('div');
+            optionsContainer.classList.add('options-container');
+
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-button');
+                button.onclick = () => {
+                    appendMessage('user', option);
+                    responses[questions[currentQuestionIndex].text] = option;
+
+                    optionsContainer.remove();
+                    currentQuestionIndex++;
+                    displayQuestion();
+                };
+                optionsContainer.appendChild(button);
+            });
+
+            chatWindow.appendChild(optionsContainer);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
         function showInputField() {
             const inputField = document.getElementById('chat-input');
-            inputField.type = 'text';
-            inputField.placeholder = 'Type your response...';
             inputField.style.display = 'block';
             document.getElementById('send-button').style.display = 'block';
 
@@ -167,41 +170,204 @@
             };
         }
 
-        function showTextareaField() {
-            const inputField = document.getElementById('chat-input');
-            inputField.type = 'text';
-            inputField.placeholder = 'Type your notes here...';
-            inputField.style.display = 'block';
+        function showFileUpload() {
+            const fileInput = document.getElementById('file-input');
+            fileInput.style.display = 'block';
             document.getElementById('send-button').style.display = 'block';
 
             document.getElementById('send-button').onclick = () => {
-                const userResponse = inputField.value.trim();
+                const uploadedFile = fileInput.files[0];
+                if (!uploadedFile) return;
+
+                appendMessage('user', `Uploaded: ${uploadedFile.name}`);
+                responses[questions[currentQuestionIndex].text] = uploadedFile.name;
+
+                fileInput.value = ''; // Clear the file input
+                fileInput.style.display = 'none';
+                document.getElementById('send-button').style.display = 'none';
+
+                currentQuestionIndex++;
+                displayQuestion();
+            };
+        }
+
+        function showTextareaField() {
+            const textareaInput = document.getElementById('textarea-input');
+            textareaInput.style.display = 'block';
+            document.getElementById('send-button').style.display = 'block';
+
+            document.getElementById('send-button').onclick = () => {
+                const userResponse = textareaInput.value.trim();
                 if (!userResponse) return;
 
                 appendMessage('user', userResponse);
                 responses[questions[currentQuestionIndex].text] = userResponse;
 
-                inputField.value = '';
-                inputField.style.display = 'none';
+                textareaInput.value = '';
+                textareaInput.style.display = 'none';
                 document.getElementById('send-button').style.display = 'none';
 
-                displayFinalMessage();
+                currentQuestionIndex++;
+                displayQuestion();
             };
         }
 
-        function displayFinalMessage() {
-            appendMessage('bot', 'Thank you for your submission. We\'ll look into it and get back to you as soon as possible.');
+        function editResponse(questionKey) {
+            const question = questions.find(q => q.text === questionKey);
+            if (!question) return;
+
+            appendMessage('bot', `Editing response for: ${questionKey}`);
+            const chatWindow = document.getElementById('chat-window');
+
+            switch (question.type) {
+                case 'input':
+                    const inputField = document.getElementById('chat-input');
+                    inputField.value = responses[questionKey] || '';
+                    inputField.style.display = 'block';
+                    document.getElementById('send-button').style.display = 'block';
+                    document.getElementById('send-button').onclick = () => {
+                        const newResponse = inputField.value.trim();
+                        if (!newResponse) return;
+                        responses[questionKey] = newResponse;
+                        inputField.value = '';
+                        inputField.style.display = 'none';
+                        appendMessage('user', newResponse, true, questionKey);
+                        showSubmitButton();
+                    };
+                    break;
+
+                case 'options':
+                    const optionsContainer = document.createElement('div');
+                    optionsContainer.classList.add('options-container');
+                    question.options.forEach(option => {
+                        const button = document.createElement('button');
+                        button.textContent = option;
+                        button.classList.add('option-button');
+                        button.onclick = () => {
+                            responses[questionKey] = option;
+                            appendMessage('user', option, true, questionKey);
+                            optionsContainer.remove();
+                            showSubmitButton();
+                        };
+                        optionsContainer.appendChild(button);
+                    });
+                    chatWindow.appendChild(optionsContainer);
+                    break;
+
+                case 'datetime':
+                    const datetimeInput = document.getElementById('datetime-input');
+                    datetimeInput.value = responses[questionKey] || '';
+                    datetimeInput.style.display = 'block';
+                    document.getElementById('send-button').style.display = 'block';
+                    document.getElementById('send-button').onclick = () => {
+                        const newResponse = datetimeInput.value.trim();
+                        if (!newResponse) return;
+                        responses[questionKey] = newResponse;
+                        datetimeInput.value = '';
+                        datetimeInput.style.display = 'none';
+                        appendMessage('user', newResponse, true, questionKey);
+                        showSubmitButton();
+                    };
+                    break;
+
+                case 'file':
+                    const fileInput = document.getElementById('file-input');
+                    fileInput.style.display = 'block';
+                    document.getElementById('send-button').style.display = 'block';
+                    document.getElementById('send-button').onclick = () => {
+                        const uploadedFile = fileInput.files[0];
+                        if (!uploadedFile) return;
+                        responses[questionKey] = uploadedFile.name;
+                        fileInput.value = '';
+                        fileInput.style.display = 'none';
+                        appendMessage('user', `Uploaded: ${uploadedFile.name}`, true, questionKey);
+                        showSubmitButton();
+                    };
+                    break;
+
+                default:
+                    appendMessage('bot', 'Editing not supported for this type.');
+            }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            displayQuestion(); // Start the conversation
+        function displayConfirmationStep() {
+            appendMessage('bot', 'Can I confirm this information?');
+            const options = ['Yes', 'No'];
 
-            // Close button functionality
-            document.getElementById('close-button').onclick = () => {
-                const chatbotContainer = document.querySelector('.chatbot-container');
-                chatbotContainer.style.display = 'none'; // Hide the chatbot
+            const chatWindow = document.getElementById('chat-window');
+            const optionsContainer = document.createElement('div');
+            optionsContainer.classList.add('options-container');
+
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-button');
+                button.onclick = () => {
+                    appendMessage('user', option);
+
+                    if (option === 'Yes') {
+                        optionsContainer.remove();
+                        showSubmitButton();
+                    } else {
+                        optionsContainer.remove();
+                        displayEditableResponses();
+                    }
+                };
+                optionsContainer.appendChild(button);
+            });
+
+            chatWindow.appendChild(optionsContainer);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function displayEditableResponses() {
+            Object.keys(responses).forEach(questionKey => {
+                appendMessage('bot', `${questions.find(q => q.text === questionKey)?.text || questionKey}:`);
+                appendMessage('user', responses[questionKey], true, questionKey);
+            });
+        }
+
+        function showSubmitButton() {
+            const submitButton = document.getElementById('submit-button');
+            submitButton.style.display = 'block';
+            submitButton.onclick = () => {
+                appendMessage('bot', 'Thank you for submitting your response!');
+
+                const data = {
+                    time_B: (new Date() - startTime) / 1000,
+                    errors_B: calculateErrors()
+                };
+
+                fetch('/prototype-b', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.ok ? window.location.href = "/task" : appendMessage('bot', 'Submission failed. Try again.'))
+                .catch(() => appendMessage('bot', 'An error occurred.'));
             };
-        });
+        }
+
+        function calculateErrors() {
+            const correctAnswers = {
+                "What type of incident are you reporting?": "Phishing",
+                "Please provide your name:": "John Wick",
+                "Please provide your email address:": "john.wick@techsecure.com",
+                "Please provide your department:": "IT",
+                "Could you please tell us which type of device was targeted in the incident?": "Laptop",
+                "What do you think as the suspected source of the incident?it can be a email  id or a website": "account-security@unknownmail.com",
+                "What kind of data can be affected?": "Confidential Company Data",
+                "How would you rate the severity of this incident?": "Critical",
+                "When did this incident occur?": "2025-01-25T15:47",
+                "Which team should be notified about this incident?": "Security Operations Center"
+            };
+
+            let errors = 0;
+            for (const key in correctAnswers) {
+                if (responses[key]?.toLowerCase() !== correctAnswers[key].toLowerCase()) errors++;
+            }
+            return errors;
+        }
     </script>
 </body>
 </html>
