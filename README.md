@@ -38,32 +38,15 @@ The goal is to compare these prototypes and demonstrate how interactivity can en
 
 ### **Frontend**
 - **HTML5**: For structuring the prototypes.
-- **CSS3**: For styling and responsive design.
+- **CSS**: For styling and responsive design.
 - **JavaScript**: For dynamic interactivity.
 
 ### **Backend**
 - **Python (Flask)**: For serving templates and managing user interactions.
+- **DBSqlite**: database to store user details.
 
 ---
 
-## **Folder Structure**
-
-```
-incident_response_system/
-├── src/
-│   └── app.py                 # Main application logic
-├── static/
-│   ├── prototype_a.css        # Styles for Prototype A
-│   ├── prototype_b.css        # Styles for Prototype B
-├── templates/
-│   ├── prototype_a.html       # Multi-step form (Prototype A)
-│   ├── prototype_b.html       # Chatbot widget (Prototype B)
-│   └── success.html           # Submission success page
-├── README.md                  # Project documentation
-└── requirements.txt           # Python dependencies
-```
-
----
 
 ## **How to Run the Project**
 
@@ -90,30 +73,7 @@ incident_response_system/
    http://127.0.0.1:5000
    ```
 
----
 
-## **Contributing**
 
-We welcome contributions to enhance the project! Follow these steps to contribute:
-1. Fork the repository.
-2. Create a new branch:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-3. Commit your changes:
-   ```bash
-   git commit -m "Added a new feature"
-   ```
-4. Push the branch:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-5. Open a pull request.
 
----
 
-## **License**
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
