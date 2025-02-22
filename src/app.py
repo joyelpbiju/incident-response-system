@@ -6,6 +6,7 @@ app = Flask(__name__, template_folder='../templates', static_folder='../static')
 
 def connect_db():
     """Connect to SQLite database."""
+    #change the File path accordingly 
     db_path = r"C:\Users\Acer\PycharmProjects\incident_response_system\user_performance.db"
     return sqlite3.connect(db_path)
 
