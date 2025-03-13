@@ -1,79 +1,81 @@
 # **Incident Response System**
 
-This project is being developed by [Joshua Porunnedath Biju](https://github.com/JOSHUAPBIJU) and [Joyel Porunnedath Biju](https://github.com/joyelpbiju).
+This project was developed by [Joshua Porunnedath Biju](https://github.com/JOSHUAPBIJU) and [Joyel Porunnedath Biju](https://github.com/joyelpbiju).
 
-![License](https://img.shields.io/badge/license-MIT-green) ![Contributions](https://img.shields.io/badge/contributions-welcome-brightgreen) ![Status](https://img.shields.io/badge/status-active-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-green) ![Contributions](https://img.shields.io/badge/contributions-welcome-brightgreen) ![Status](https://img.shields.io/badge/status-completed-blue)
 
 ## **Project Overview**
 
-The **Incident Response System** is part of the **Interactive Systems** subject, focusing on creating intuitive and user-friendly interfaces. This project includes two prototypes aimed at improving user interaction, making it more engaging and accessible:
-- **Prototype A:** A multi-step form-based approach for user input.
-- **Prototype B:** An interactive chatbot widget that offers a conversational interface for the same tasks.
+The **Incident Response System** was developed as part of the **Interactive Systems** course to analyze how different user interface designs impact **cybersecurity incident reporting**. The project consists of **two UI prototypes**:
 
-The goal is to compare these prototypes and demonstrate how interactivity can enhance the user experience.
+- **Prototype A:** A multi-step **form-based** interface requiring manual input.
+- **Prototype B:** An **interactive chatbot** guiding users through predefined responses.
 
-**This project is a work in progress, with additional features and refinements planned.**
+The goal was to **evaluate usability, completion time, and error rates** between the two approaches. The study was conducted in a **controlled environment**, where **users were required to provide responses that matched predefined answers** for valid comparisons.
 
----
+**This project is fully developed and no further updates are planned.**
 
 ## **Features**
 
-- **Prototype A:**
-  - Multi-step form for structured input collection.
-  - Progress bar to track completion.
-  - Traditional form-based structure.
+- **Prototype A (Form-Based UI):**
+  - Multi-step structured input collection.
+  - Progress bar for tracking user progress.
+  - Traditional form layout.
 
-- **Prototype B:**
-  - Conversational chatbot for an engaging user experience.
+- **Prototype B (Chatbot UI):**
+  - Conversational-style interaction.
   - Dynamic responses based on user inputs.
-  - Interactive and intuitive design.
+  - Predefined answer selection for structured reporting.
 
-- **Other Features:**
+- **Additional Features:**
   - Real-time input validation.
-  - Responsive design for all devices.
-
----
+  - Fully responsive design.
+  - Performance data logging for analysis.
 
 ## **Technologies Used**
 
 ### **Frontend**
-- **HTML5**: For structuring the prototypes.
-- **CSS**: For styling and responsive design.
-- **JavaScript**: For dynamic interactivity.
+- **HTML5**: Page structure.
+- **CSS**: Styling and responsiveness.
+- **JavaScript**: Interactivity.
 
 ### **Backend**
-- **Python (Flask)**: For serving templates and managing user interactions.
-- **DBSqlite**: database to store user details.
+- **Python (Flask)**: Web framework.
+- **SQLite**: User data storage.
 
----
+### **Data Analysis**
+- **Python (pandas, scipy)**: Performance evaluation.
+- **Statistical Tests**: Paired t-tests, SUS scoring.
 
+## **Setup Instructions**
 
-## **How to Run the Project**
+To run the project, follow these steps:
 
-### **Prerequisites**
-1. Install Python (version 3.8 or later).
-2. Install `pip` for managing Python packages.
-
-### **Setup Instructions**
 1. Clone the repository:
    ```bash
    git clone https://github.com/joyelpbiju/incident-response-system.git
    cd incident-response-system
-   ```
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Run the Flask app:
-   ```bash
-   python src/app.py
-   ```
-4. Open the app in your browser:
-   ```
-   http://127.0.0.1:5000
-   ```
+2.Run the Flask application:
+python src/app.py
+then open 
+http://127.0.0.1:5000
+### **Limitations**
+This project was conducted in a controlled environment and has the following limitations:
 
+-**Predefined Answers**: The study assumes that users provide exact predefined answers, which may not always happen in real-world scenarios.
 
+-**Controlled Environment:** The system was not deployed but tested in a structured setting.
+
+-**Task Familiarity:** Users interacted with Prototype A first, which may have influenced their experience with Prototype B.
+
+-**Limited Sample Size:** The study involved 30 participants, limiting generalizability.
+
+-**No AI Adaptability:** The chatbot (Prototype B) follows a fixed script and does not adapt dynamically to user behavior.
+
+### **Project Documentation**
+For a detailed analysis, methodology, experimental results, and discussion, refer to the Short Report:
+
+📄 [Short Report](short report/Short Report.pdf)
 
 
 
